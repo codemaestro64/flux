@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package flux;
-
-option go_package = "github.com/codemaestro64/flex/internal/proto";

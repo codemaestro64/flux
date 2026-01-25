@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package flux;
+
+option go_package = "github.com/codemaestro64/flex/internal/proto";
+
+message AllowRequest {
+  string key = 1;
+  uint32 tokens = 2;
+}
+
+message AllowResponse {
+  string key = 1;
+  bool allowed = 2;
+  double tokens_remaining = 3;
+  int64 reset_after_ms = 4;
+}
+
+message BatchAllowRequest {
+  repeated AllowRequest requests = 1;
+}
+
+message BatchAllowResponse {
+  repeated AllowResponse responses = 1;
+}
+
+service RateLimiter {
+  // Unary for single check
+  rpc Allow(AllowRequest) returns (AllowResponse);
+
+  // Bidirectional streaming for high-throughput batch checks
+  rpc BatchAllow(stream AllowRequest) returns (stream AllowResponse);
+}

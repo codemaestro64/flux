@@ -1,0 +1,6 @@
+version: v1
+plugins:
+  # Go Plugins
+  - plugin: go
+    out: internal/gen
+    opt: paths=source_relative
