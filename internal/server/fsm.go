@@ -14,46 +14,45 @@ import (
 	"github.com/codemaestro64/flux/internal/types"
 )
 
-// RateLimiterFSM implements the raft.FSM interface.
-// It bridges the replicated log to the local token bucket state.
+// RateLimiterFSM implements the raft.FSM interface
+// It bridges the replicated log to the local token bucket state
 type RateLimiterFSM struct {
 	mu      sync.RWMutex
 	limiter map[string]*rate.Limiter
 }
 
-// NewFSM initializes an empty state machine.
+// NewFSM initializes an empty state machine
 func NewFSM() *RateLimiterFSM {
 	return &RateLimiterFSM{
 		limiter: make(map[string]*rate.Limiter),
 	}
 }
 
-// Apply is called by Raft after a log entry is committed by a quorum.
-// It must be deterministic; all nodes must arrive at the exact same state.
+// Apply is called by Raft after a log entry is committed by a quorum
+// It must be deterministic; all nodes must arrive at the exact same state
 func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 	var cmd types.Command
 	if err := json.Unmarshal(log.Data, &cmd); err != nil {
-		// This should only happen if there is an internal bug or version mismatch.
 		return err
 	}
 
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	// Use the leader-provided timestamp for all time-based calculations.
-	// This ensures that token refills are calculated identically across the cluster.
+	// Use the leader-provided timestamp for all time-based calculations
+	// This ensures that token refills are calculated identically across the cluster
 	applyTime := time.Unix(0, cmd.Timestamp)
 
 	switch cmd.Type {
 	case types.CmdAllow:
 		lim, exists := f.limiter[cmd.Key]
 		if !exists {
-			// Initialize with default conservative limits if not explicitly set.
+			// Initialize with default conservative limits if not explicitly set
 			lim = rate.NewLimiter(1, 1)
 			f.limiter[cmd.Key] = lim
 		}
 
-		// AllowN consumes tokens atomically against the provided logical time.
+		// AllowN consumes tokens atomically against the provided logical time
 		allowed := lim.AllowN(applyTime, int(cmd.Tokens))
 
 		return &pb.AllowResponse{
@@ -63,7 +62,7 @@ func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 		}
 
 	case types.CmdSetLimit:
-		// Upsert logic for updating bucket configuration (TPS/Burst).
+		// Upsert logic for updating bucket configuration (TPS/Burst)
 		lim := rate.NewLimiter(rate.Limit(cmd.Rate), int(cmd.Burst))
 		f.limiter[cmd.Key] = lim
 		return nil
@@ -71,7 +70,7 @@ func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 	return nil
 }
 
-// fsmSnapshot represents a point-in-time state of all rate limiters for persistence.
+// fsmSnapshot represents a point-in-time state of all rate limiters for persistence
 type fsmSnapshot struct {
 	Data map[string]struct {
 		Rate   float64
@@ -81,7 +80,7 @@ type fsmSnapshot struct {
 	}
 }
 
-// Snapshot is called by Raft to compact the log or prepare for state transfer.
+// Snapshot is called by Raft to compact the log or prepare for state transfer
 func (f *RateLimiterFSM) Snapshot() (raft.FSMSnapshot, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
@@ -93,7 +92,7 @@ func (f *RateLimiterFSM) Snapshot() (raft.FSMSnapshot, error) {
 		Last   time.Time
 	})}
 
-	// Capture the current bucket levels and configurations.
+	// Capture the current bucket levels and configurations
 	now := time.Now()
 	for k, lim := range f.limiter {
 		snap.Data[k] = struct {
@@ -112,13 +111,12 @@ func (f *RateLimiterFSM) Snapshot() (raft.FSMSnapshot, error) {
 	return &fsmSnapshotImpl{data: snap}, nil
 }
 
-// fsmSnapshotImpl handles the serialization of the captured state.
+// fsmSnapshotImpl handles the serialization of the captured state
 type fsmSnapshotImpl struct{ data fsmSnapshot }
 
-// Persist writes the snapshot to the given sink (usually disk).
+// Persist writes the snapshot to the given sink
 func (s *fsmSnapshotImpl) Persist(sink raft.SnapshotSink) error {
 	err := func() error {
-		// Binary encoding for space efficiency and speed.
 		if err := gob.NewEncoder(sink).Encode(s.data); err != nil {
 			return err
 		}
@@ -131,10 +129,10 @@ func (s *fsmSnapshotImpl) Persist(sink raft.SnapshotSink) error {
 	return err
 }
 
-// Release is a no-op; we don't hold resources that need explicit cleanup after Persist.
+// Release is a no-op
 func (s *fsmSnapshotImpl) Release() {}
 
-// Restore replaces the entire local state with a snapshot from the leader or stable storage.
+// Restore replaces the entire local state with a snapshot from the leader or stable storage
 func (f *RateLimiterFSM) Restore(rc io.ReadCloser) error {
 	defer rc.Close()
 
@@ -146,12 +144,10 @@ func (f *RateLimiterFSM) Restore(rc io.ReadCloser) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	// Reset and re-initialize map from decoded data.
+	// Reset and re-initialize map from decoded data
 	f.limiter = make(map[string]*rate.Limiter)
 	for k, v := range snap.Data {
 		lim := rate.NewLimiter(rate.Limit(v.Rate), v.Burst)
-		// Note: Token count is currently reset to full on restore.
-		// Accurate token restoration requires custom x/time/rate padding.
 		f.limiter[k] = lim
 	}
 	return nil

@@ -17,7 +17,7 @@ import (
 	"github.com/codemaestro64/flux/internal/types"
 )
 
-// Global metrics for cluster-wide observability.
+// Global metrics for cluster-wide observability
 var (
 	allowCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -54,15 +54,15 @@ func init() {
 	prometheus.MustRegister(allowCounter, allowLatency, batchAllowCounter, raftLeaderGauge)
 }
 
-// RateLimiterServer handles incoming gRPC requests and interfaces with the Raft node.
+// RateLimiterServer handles incoming gRPC requests and interfaces with the Raft node
 type RateLimiterServer struct {
 	pb.UnimplementedRateLimiterServer
 	Node *RaftNode
 }
 
-// Allow processes a single limit check. Only the leader can accept writes to the replicated log.
+// Allow processes a single limit check. Only the leader can accept writes to the replicated log
 func (s *RateLimiterServer) Allow(ctx context.Context, req *pb.AllowRequest) (*pb.AllowResponse, error) {
-	// Verify leadership before attempting to propose a log entry.
+	// Verify leadership before attempting to propose a log entry
 	if s.Node.Raft.State() != raft.Leader {
 		return nil, status.Error(codes.Unavailable, "not leader")
 	}
@@ -78,7 +78,7 @@ func (s *RateLimiterServer) Allow(ctx context.Context, req *pb.AllowRequest) (*p
 		Timestamp: time.Now().UnixNano(),
 	}
 
-	// Commit the command to the Raft log and wait for quorum acknowledgment.
+	// Commit the command to the Raft log and wait for quorum acknowledgment
 	respI, err := s.Node.Apply(cmd, 10*time.Second)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "apply failed: %v", err)
@@ -86,7 +86,7 @@ func (s *RateLimiterServer) Allow(ctx context.Context, req *pb.AllowRequest) (*p
 
 	resp := respI.(*pb.AllowResponse)
 
-	// Update metrics based on the FSM decision.
+	// Update metrics based on the FSM decision
 	allowedStr := "false"
 	if resp.Allowed {
 		allowedStr = "true"
@@ -103,11 +103,10 @@ func (s *RateLimiterServer) BatchAllow(stream pb.RateLimiter_BatchAllowServer) e
 		return status.Error(codes.Unavailable, "not leader")
 	}
 
-	// streamMu is required because gRPC streams do not support concurrent Send calls.
 	var streamMu sync.Mutex
 	var wg sync.WaitGroup
 
-	// Track the first error encountered to terminate the stream.
+	// Track the first error encountered to terminate the stream
 	var once sync.Once
 	var firstErr error
 	setErr := func(err error) {
@@ -123,7 +122,6 @@ func (s *RateLimiterServer) BatchAllow(stream pb.RateLimiter_BatchAllowServer) e
 			return err
 		}
 
-		// Process each request in the stream concurrently to leverage Raft's pipeline.
 		wg.Add(1)
 		go func(r *pb.AllowRequest) {
 			defer wg.Done()
@@ -157,7 +155,7 @@ func (s *RateLimiterServer) BatchAllow(stream pb.RateLimiter_BatchAllowServer) e
 	return firstErr
 }
 
-// StartMetricsServer initializes the Prometheus scrape endpoint.
+// StartMetricsServer initializes the Prometheus scrape endpoint
 func StartMetricsServer(addr string) {
 	http.Handle("/metrics", promhttp.Handler())
 	go http.ListenAndServe(addr, nil)
