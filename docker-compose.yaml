@@ -1,0 +1,63 @@
+services:
+  node-1:
+    build: .
+    container_name: flux-node-1
+    command: >
+      --id=node-1 
+      --raft-addr=node-1:7000 
+      --grpc-addr=0.0.0.0:50051 
+      --data-dir=/data/raft 
+      --bootstrap=true
+    ports:
+      - "50051:50051"
+    volumes:
+      - node1_data:/data/raft
+    networks:
+      flux-net:
+        ipv4_address: 172.20.0.11
+
+  node-2:
+    build: .
+    container_name: flux-node-2
+    command: >
+      --id=node-2 
+      --raft-addr=node-2:7000 
+      --grpc-addr=0.0.0.0:50051 
+      --data-dir=/data/raft 
+      --bootstrap=false
+    ports:
+      - "50052:50051"
+    volumes:
+      - node2_data:/data/raft
+    networks:
+      flux-net:
+        ipv4_address: 172.20.0.12
+
+  node-3:
+    build: .
+    container_name: flux-node-3
+    command: >
+      --id=node-3 
+      --raft-addr=node-3:7000 
+      --grpc-addr=0.0.0.0:50051 
+      --data-dir=/data/raft 
+      --bootstrap=false
+    ports:
+      - "50053:50051"
+    volumes:
+      - node3_data:/data/raft
+    networks:
+      flux-net:
+        ipv4_address: 172.20.0.13
+
+networks:
+  flux-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  node1_data:
+  node2_data:
+  node3_data:

@@ -229,6 +229,206 @@ func (x *BatchAllowResponse) GetResponses() []*AllowResponse {
 	return nil
 }
 
+type SetLimitRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Rate          float64                `protobuf:"fixed64,2,opt,name=rate,proto3" json:"rate,omitempty"` // tokens per second
+	Burst         uint32                 `protobuf:"varint,3,opt,name=burst,proto3" json:"burst,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetLimitRequest) Reset() {
+	*x = SetLimitRequest{}
+	mi := &file_v1_rate_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetLimitRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetLimitRequest) ProtoMessage() {}
+
+func (x *SetLimitRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rate_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetLimitRequest.ProtoReflect.Descriptor instead.
+func (*SetLimitRequest) Descriptor() ([]byte, []int) {
+	return file_v1_rate_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SetLimitRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *SetLimitRequest) GetRate() float64 {
+	if x != nil {
+		return x.Rate
+	}
+	return 0
+}
+
+func (x *SetLimitRequest) GetBurst() uint32 {
+	if x != nil {
+		return x.Burst
+	}
+	return 0
+}
+
+type SetLimitResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetLimitResponse) Reset() {
+	*x = SetLimitResponse{}
+	mi := &file_v1_rate_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetLimitResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetLimitResponse) ProtoMessage() {}
+
+func (x *SetLimitResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rate_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetLimitResponse.ProtoReflect.Descriptor instead.
+func (*SetLimitResponse) Descriptor() ([]byte, []int) {
+	return file_v1_rate_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SetLimitResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type JoinRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinRequest) Reset() {
+	*x = JoinRequest{}
+	mi := &file_v1_rate_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinRequest) ProtoMessage() {}
+
+func (x *JoinRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rate_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinRequest.ProtoReflect.Descriptor instead.
+func (*JoinRequest) Descriptor() ([]byte, []int) {
+	return file_v1_rate_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *JoinRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *JoinRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type JoinResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinResponse) Reset() {
+	*x = JoinResponse{}
+	mi := &file_v1_rate_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinResponse) ProtoMessage() {}
+
+func (x *JoinResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_rate_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinResponse.ProtoReflect.Descriptor instead.
+func (*JoinResponse) Descriptor() ([]byte, []int) {
+	return file_v1_rate_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *JoinResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_v1_rate_proto protoreflect.FileDescriptor
 
 const file_v1_rate_proto_rawDesc = "" +
@@ -245,11 +445,24 @@ const file_v1_rate_proto_rawDesc = "" +
 	"\x11BatchAllowRequest\x12.\n" +
 	"\brequests\x18\x01 \x03(\v2\x12.flux.AllowRequestR\brequests\"G\n" +
 	"\x12BatchAllowResponse\x121\n" +
-	"\tresponses\x18\x01 \x03(\v2\x13.flux.AllowResponseR\tresponses2z\n" +
+	"\tresponses\x18\x01 \x03(\v2\x13.flux.AllowResponseR\tresponses\"M\n" +
+	"\x0fSetLimitRequest\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
+	"\x04rate\x18\x02 \x01(\x01R\x04rate\x12\x14\n" +
+	"\x05burst\x18\x03 \x01(\rR\x05burst\",\n" +
+	"\x10SetLimitResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"@\n" +
+	"\vJoinRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"(\n" +
+	"\fJoinResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xe4\x01\n" +
 	"\vRateLimiter\x120\n" +
 	"\x05Allow\x12\x12.flux.AllowRequest\x1a\x13.flux.AllowResponse\x129\n" +
 	"\n" +
-	"BatchAllow\x12\x12.flux.AllowRequest\x1a\x13.flux.AllowResponse(\x010\x01B.Z,github.com/codemaestro64/flex/internal/protob\x06proto3"
+	"BatchAllow\x12\x12.flux.AllowRequest\x1a\x13.flux.AllowResponse(\x010\x01\x129\n" +
+	"\bSetLimit\x12\x15.flux.SetLimitRequest\x1a\x16.flux.SetLimitResponse\x12-\n" +
+	"\x04Join\x12\x11.flux.JoinRequest\x1a\x12.flux.JoinResponseB.Z,github.com/codemaestro64/flex/internal/protob\x06proto3"
 
 var (
 	file_v1_rate_proto_rawDescOnce sync.Once
@@ -263,22 +476,30 @@ func file_v1_rate_proto_rawDescGZIP() []byte {
 	return file_v1_rate_proto_rawDescData
 }
 
-var file_v1_rate_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_v1_rate_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_v1_rate_proto_goTypes = []any{
 	(*AllowRequest)(nil),       // 0: flux.AllowRequest
 	(*AllowResponse)(nil),      // 1: flux.AllowResponse
 	(*BatchAllowRequest)(nil),  // 2: flux.BatchAllowRequest
 	(*BatchAllowResponse)(nil), // 3: flux.BatchAllowResponse
+	(*SetLimitRequest)(nil),    // 4: flux.SetLimitRequest
+	(*SetLimitResponse)(nil),   // 5: flux.SetLimitResponse
+	(*JoinRequest)(nil),        // 6: flux.JoinRequest
+	(*JoinResponse)(nil),       // 7: flux.JoinResponse
 }
 var file_v1_rate_proto_depIdxs = []int32{
 	0, // 0: flux.BatchAllowRequest.requests:type_name -> flux.AllowRequest
 	1, // 1: flux.BatchAllowResponse.responses:type_name -> flux.AllowResponse
 	0, // 2: flux.RateLimiter.Allow:input_type -> flux.AllowRequest
 	0, // 3: flux.RateLimiter.BatchAllow:input_type -> flux.AllowRequest
-	1, // 4: flux.RateLimiter.Allow:output_type -> flux.AllowResponse
-	1, // 5: flux.RateLimiter.BatchAllow:output_type -> flux.AllowResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
+	4, // 4: flux.RateLimiter.SetLimit:input_type -> flux.SetLimitRequest
+	6, // 5: flux.RateLimiter.Join:input_type -> flux.JoinRequest
+	1, // 6: flux.RateLimiter.Allow:output_type -> flux.AllowResponse
+	1, // 7: flux.RateLimiter.BatchAllow:output_type -> flux.AllowResponse
+	5, // 8: flux.RateLimiter.SetLimit:output_type -> flux.SetLimitResponse
+	7, // 9: flux.RateLimiter.Join:output_type -> flux.JoinResponse
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -295,7 +516,7 @@ func file_v1_rate_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_rate_proto_rawDesc), len(file_v1_rate_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

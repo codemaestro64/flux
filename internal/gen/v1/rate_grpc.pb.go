@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	RateLimiter_Allow_FullMethodName      = "/flux.RateLimiter/Allow"
 	RateLimiter_BatchAllow_FullMethodName = "/flux.RateLimiter/BatchAllow"
+	RateLimiter_SetLimit_FullMethodName   = "/flux.RateLimiter/SetLimit"
+	RateLimiter_Join_FullMethodName       = "/flux.RateLimiter/Join"
 )
 
 // RateLimiterClient is the client API for RateLimiter service.
@@ -31,6 +33,8 @@ type RateLimiterClient interface {
 	Allow(ctx context.Context, in *AllowRequest, opts ...grpc.CallOption) (*AllowResponse, error)
 	// Bidirectional streaming for high-throughput batch checks
 	BatchAllow(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AllowRequest, AllowResponse], error)
+	SetLimit(ctx context.Context, in *SetLimitRequest, opts ...grpc.CallOption) (*SetLimitResponse, error)
+	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
 }
 
 type rateLimiterClient struct {
@@ -64,6 +68,26 @@ func (c *rateLimiterClient) BatchAllow(ctx context.Context, opts ...grpc.CallOpt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type RateLimiter_BatchAllowClient = grpc.BidiStreamingClient[AllowRequest, AllowResponse]
 
+func (c *rateLimiterClient) SetLimit(ctx context.Context, in *SetLimitRequest, opts ...grpc.CallOption) (*SetLimitResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetLimitResponse)
+	err := c.cc.Invoke(ctx, RateLimiter_SetLimit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rateLimiterClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JoinResponse)
+	err := c.cc.Invoke(ctx, RateLimiter_Join_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RateLimiterServer is the server API for RateLimiter service.
 // All implementations must embed UnimplementedRateLimiterServer
 // for forward compatibility.
@@ -72,6 +96,8 @@ type RateLimiterServer interface {
 	Allow(context.Context, *AllowRequest) (*AllowResponse, error)
 	// Bidirectional streaming for high-throughput batch checks
 	BatchAllow(grpc.BidiStreamingServer[AllowRequest, AllowResponse]) error
+	SetLimit(context.Context, *SetLimitRequest) (*SetLimitResponse, error)
+	Join(context.Context, *JoinRequest) (*JoinResponse, error)
 	mustEmbedUnimplementedRateLimiterServer()
 }
 
@@ -87,6 +113,12 @@ func (UnimplementedRateLimiterServer) Allow(context.Context, *AllowRequest) (*Al
 }
 func (UnimplementedRateLimiterServer) BatchAllow(grpc.BidiStreamingServer[AllowRequest, AllowResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method BatchAllow not implemented")
+}
+func (UnimplementedRateLimiterServer) SetLimit(context.Context, *SetLimitRequest) (*SetLimitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetLimit not implemented")
+}
+func (UnimplementedRateLimiterServer) Join(context.Context, *JoinRequest) (*JoinResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
 func (UnimplementedRateLimiterServer) mustEmbedUnimplementedRateLimiterServer() {}
 func (UnimplementedRateLimiterServer) testEmbeddedByValue()                     {}
@@ -134,6 +166,42 @@ func _RateLimiter_BatchAllow_Handler(srv interface{}, stream grpc.ServerStream) 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type RateLimiter_BatchAllowServer = grpc.BidiStreamingServer[AllowRequest, AllowResponse]
 
+func _RateLimiter_SetLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetLimitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RateLimiterServer).SetLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RateLimiter_SetLimit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RateLimiterServer).SetLimit(ctx, req.(*SetLimitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RateLimiter_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RateLimiterServer).Join(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RateLimiter_Join_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RateLimiterServer).Join(ctx, req.(*JoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RateLimiter_ServiceDesc is the grpc.ServiceDesc for RateLimiter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -144,6 +212,14 @@ var RateLimiter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Allow",
 			Handler:    _RateLimiter_Allow_Handler,
+		},
+		{
+			MethodName: "SetLimit",
+			Handler:    _RateLimiter_SetLimit_Handler,
+		},
+		{
+			MethodName: "Join",
+			Handler:    _RateLimiter_Join_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

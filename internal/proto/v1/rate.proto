@@ -24,10 +24,32 @@ message BatchAllowResponse {
   repeated AllowResponse responses = 1;
 }
 
+message SetLimitRequest {
+  string key = 1;
+  double rate = 2;   // tokens per second
+  uint32 burst = 3;
+}
+
+message SetLimitResponse {
+  bool success = 1;
+}
+
+message JoinRequest {
+  string node_id = 1;
+  string address = 2;
+}
+
+message JoinResponse {
+  bool success = 1;
+}
+
+
 service RateLimiter {
   // Unary for single check
   rpc Allow(AllowRequest) returns (AllowResponse);
-
+  
   // Bidirectional streaming for high-throughput batch checks
   rpc BatchAllow(stream AllowRequest) returns (stream AllowResponse);
+  rpc SetLimit(SetLimitRequest) returns (SetLimitResponse);
+  rpc Join(JoinRequest) returns (JoinResponse); // New RPC
 }

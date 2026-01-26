@@ -1,31 +1,38 @@
 package types
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/gob"
+)
 
-type CommandType string
+type CommandType int
 
 const (
-	CmdAllow    CommandType = "ALLOW"
-	CmdSetLimit CommandType = "SET_LIMIT"
+	CmdAllow CommandType = iota
+	CmdSetLimit
 )
 
 type Command struct {
-	Type CommandType `json:"type"`
-	Key  string      `json:"key"`
-	// The Leader sets this so all nodes
-	// apply the rate limit logic at the exact same logical time.
-	Timestamp int64   `json:"timestamp"`
-	Tokens    uint32  `json:"tokens,omitempty"`
-	Rate      float64 `json:"rate,omitempty"`
-	Burst     uint32  `json:"burst,omitempty"`
+	Type      CommandType
+	Key       string
+	Tokens    uint32
+	Rate      float64
+	Burst     uint32
+	Timestamp int64
 }
 
-func (c Command) Marshal() ([]byte, error) {
-	return json.Marshal(c)
+func (c *Command) Marshal() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(c); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
-func UnmarshalCommand(data []byte) (Command, error) {
-	var c Command
-	err := json.Unmarshal(data, &c)
-	return c, err
+func UnmarshalCommand(data []byte) (*Command, error) {
+	var cmd Command
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&cmd); err != nil {
+		return nil, err
+	}
+	return &cmd, nil
 }

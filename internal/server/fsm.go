@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/gob"
-	"encoding/json"
 	"io"
 	"sync"
 	"time"
@@ -31,8 +30,8 @@ func NewFSM() *RateLimiterFSM {
 // Apply is called by Raft after a log entry is committed by a quorum
 // It must be deterministic; all nodes must arrive at the exact same state
 func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
-	var cmd types.Command
-	if err := json.Unmarshal(log.Data, &cmd); err != nil {
+	cmd, err := types.UnmarshalCommand(log.Data)
+	if err != nil {
 		return err
 	}
 
@@ -65,7 +64,7 @@ func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 		// Upsert logic for updating bucket configuration (TPS/Burst)
 		lim := rate.NewLimiter(rate.Limit(cmd.Rate), int(cmd.Burst))
 		f.limiter[cmd.Key] = lim
-		return nil
+		return &pb.SetLimitResponse{Success: true}
 	}
 	return nil
 }
