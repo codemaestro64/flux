@@ -147,6 +147,11 @@ func (f *RateLimiterFSM) Restore(rc io.ReadCloser) error {
 	f.limiter = make(map[string]*rate.Limiter)
 	for k, v := range snap.Data {
 		lim := rate.NewLimiter(rate.Limit(v.Rate), v.Burst)
+		// Drain limiter to restore saved token level
+		tokensToConsume := v.Burst - int(v.Tokens)
+		if tokensToConsume > 0 {
+			lim.AllowN(v.Last, tokensToConsume)
+		}
 		f.limiter[k] = lim
 	}
 	return nil
