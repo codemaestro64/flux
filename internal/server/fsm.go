@@ -61,9 +61,16 @@ func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 		}
 
 	case types.CmdSetLimit:
-		// Upsert logic for updating bucket configuration (TPS/Burst)
-		lim := rate.NewLimiter(rate.Limit(cmd.Rate), int(cmd.Burst))
-		f.limiter[cmd.Key] = lim
+		newLim := rate.NewLimiter(rate.Limit(cmd.Rate), int(cmd.Burst))
+		if old, exists := f.limiter[cmd.Key]; exists {
+			// Preserve proportional token fill
+			ratio := old.TokensAt(applyTime) / float64(old.Burst())
+			drain := int(float64(cmd.Burst) * (1.0 - ratio))
+			if drain > 0 {
+				newLim.AllowN(applyTime, drain)
+			}
+		}
+		f.limiter[cmd.Key] = newLim
 		return &pb.SetLimitResponse{Success: true}
 	}
 	return nil
