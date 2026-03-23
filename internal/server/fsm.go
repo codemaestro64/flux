@@ -54,10 +54,19 @@ func (f *RateLimiterFSM) Apply(log *raft.Log) interface{} {
 		// AllowN consumes tokens atomically against the provided logical time
 		allowed := lim.AllowN(applyTime, int(cmd.Tokens))
 
+		var resetAfterMs int64
+		if !allowed {
+			// Reserve without consuming to get wait duration
+			r := lim.ReserveN(applyTime, int(cmd.Tokens))
+			resetAfterMs = r.DelayFrom(applyTime).Milliseconds()
+			r.Cancel() // cancel. we only wanted the delay estimate
+		}
+
 		return &pb.AllowResponse{
 			Key:             cmd.Key,
 			Allowed:         allowed,
 			TokensRemaining: lim.TokensAt(applyTime),
+			ResetAfterMs:    resetAfterMs,
 		}
 
 	case types.CmdSetLimit:
